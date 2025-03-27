@@ -1,6 +1,6 @@
 from django.apps import AppConfig
 
 
-class ServieRequestsConfig(AppConfig):
+class ServiceRequestsConfig(AppConfig):
     default_auto_field = 'django.db.models.BigAutoField'
-    name = 'servie_requests'
+    name = 'service_requests'
