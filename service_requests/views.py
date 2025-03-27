@@ -1,5 +1,5 @@
-from django.contrib.auth.mixins import LoginRequiredMixin
-from django.views.generic import ListView, CreateView
+from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
+from django.views.generic import ListView, CreateView, UpdateView
 from django.urls import reverse_lazy
 from .models import ServiceRequest
 from .forms import ServiceRequestForm
@@ -21,3 +21,13 @@ class ServiceRequestCreateView(LoginRequiredMixin, CreateView):
     def form_valid(self, form):
         form.instance.user = self.request.user
         return super().form_valid(form)
+
+class ServiceRequestUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
+    model = ServiceRequest
+    fields = ['status']
+    template_name = 'service_requests/request_update.html'
+    success_url = reverse_lazy('request_list')
+
+    def test_func(self):
+        # to allow only staff users to update the status
+        return self.request.user.is_staff
