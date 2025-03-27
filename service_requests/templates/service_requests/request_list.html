@@ -12,4 +12,18 @@
         <li>No service requests yet.</li>
     {% endfor %}
 </ul>
+
+<ul>
+    {% for request in requests %}
+        <li>
+            {{ request.request_type }} - {{ request.status }} (Created: {{ request.created_at }})
+            {% if user.is_staff %}
+                | <a href="{% url 'request_update' request.pk %}">Update Status</a>
+            {% endif %}
+        </li>
+    {% empty %}
+        <li>No service requests yet.</li>
+    {% endfor %}
+</ul>
+
 {% endblock %}
