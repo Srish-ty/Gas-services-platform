@@ -14,7 +14,7 @@ from rest_framework.response import Response
 from rest_framework.decorators import api_view
 from rest_framework import status
 from django.contrib.auth.models import User
-
+from django.views.decorators.csrf import csrf_exempt
 
 
 def signup_view(request):
@@ -81,6 +81,7 @@ class ServiceRequestDetailAPIView(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = ServiceRequestSerializer
     permission_classes = [IsAuthenticated]
 
+@csrf_exempt
 @api_view(['POST'])
 def api_login(request):
     username = request.data.get('username')
@@ -93,7 +94,9 @@ def api_login(request):
         return Response({'token': token.key}, status=status.HTTP_200_OK)
     else:
         return Response({'error': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)
-    
+
+@csrf_exempt
+@api_view(['POST'])
 def api_signup(request):
     username = request.data.get('username')
     password = request.data.get('password')
