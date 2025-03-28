@@ -1,7 +1,10 @@
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.views.generic import ListView, CreateView, UpdateView
 from django.urls import reverse_lazy
+from rest_framework import generics
+from rest_framework.permissions import IsAuthenticated
 from .models import ServiceRequest
+from .serializers import ServiceRequestSerializer
 from .forms import ServiceRequestForm, SignupForm
 from django.contrib.auth import login
 from django.shortcuts import render, redirect
@@ -57,3 +60,16 @@ def signup_view(request):
     else:
         form = SignupForm()
     return render(request, 'registration/signup.html', {'form': form})
+
+class ServiceRequestListCreateAPIView(generics.ListCreateAPIView):
+    queryset = ServiceRequest.objects.all()
+    serializer_class = ServiceRequestSerializer
+    permission_classes = [IsAuthenticated]
+
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
+
+class ServiceRequestDetailAPIView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = ServiceRequest.objects.all()
+    serializer_class = ServiceRequestSerializer
+    permission_classes = [IsAuthenticated]
