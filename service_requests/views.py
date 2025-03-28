@@ -8,14 +8,20 @@ from .serializers import ServiceRequestSerializer
 from .forms import ServiceRequestForm, SignupForm
 from django.contrib.auth import login
 from django.shortcuts import render, redirect
+from django.contrib.auth import authenticate
+from rest_framework.authtoken.models import Token
+from rest_framework.response import Response
+from rest_framework.decorators import api_view
+from rest_framework import status
+
 
 def signup_view(request):
     if request.method == 'POST':
         form = SignupForm(request.POST)
         if form.is_valid():
             user = form.save()
-            login(request, user)  # Auto-login after signup
-            return redirect('request_list')  # Redirect to service requests
+            login(request, user)
+            return redirect('request_list')
     else:
         form = SignupForm()
     return render(request, 'registration/signup.html', {'form': form})
@@ -46,7 +52,6 @@ class ServiceRequestUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateVi
     success_url = reverse_lazy('request_list')
 
     def test_func(self):
-        # to allow only staff users to update the status
         return self.request.user.is_staff
 
 
@@ -73,3 +78,16 @@ class ServiceRequestDetailAPIView(generics.RetrieveUpdateDestroyAPIView):
     queryset = ServiceRequest.objects.all()
     serializer_class = ServiceRequestSerializer
     permission_classes = [IsAuthenticated]
+
+@api_view(['POST'])
+def api_login(request):
+    username = request.data.get('username')
+    password = request.data.get('password')
+
+    user = authenticate(username=username, password=password)
+
+    if user is not None:
+        token, created = Token.objects.get_or_create(user=user)
+        return Response({'token': token.key}, status=status.HTTP_200_OK)
+    else:
+        return Response({'error': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)
