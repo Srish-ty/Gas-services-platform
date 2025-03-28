@@ -11,7 +11,7 @@ class ServiceRequest(models.Model):
         ('resolved', 'Resolved'),
     ]
 
-    user = models.ForeignKey(User, on_delete=models.CASCADE)  # Link request to a customer
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
     request_type = models.CharField(max_length=100)
     description = models.TextField()
     attachment = models.FileField(upload_to='attachments/', blank=True, null=True)

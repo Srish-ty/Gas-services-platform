@@ -16,6 +16,9 @@ from rest_framework import status
 from django.contrib.auth.models import User
 from django.views.decorators.csrf import csrf_exempt
 
+from rest_framework.decorators import permission_classes
+from rest_framework.permissions import IsAdminUser
+
 
 def signup_view(request):
     if request.method == 'POST':
@@ -108,3 +111,16 @@ def api_signup(request):
     token = Token.objects.create(user=user)
 
     return Response({'message': 'User created successfully', 'token': token.key}, status=status.HTTP_201_CREATED)
+
+@api_view(['GET'])
+@permission_classes([IsAdminUser])
+def admin_dashboard(request):
+    users = User.objects.all().values('id', 'username', 'email', 'is_staff', 'is_active', 'date_joined')
+    
+    service_requests = ServiceRequest.objects.all()
+    service_requests_serialized = ServiceRequestSerializer(service_requests, many=True).data
+
+    return Response({
+        'users': list(users),
+        'service_requests': service_requests_serialized
+    }, status=status.HTTP_200_OK)
