@@ -2,7 +2,21 @@ from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.views.generic import ListView, CreateView, UpdateView
 from django.urls import reverse_lazy
 from .models import ServiceRequest
-from .forms import ServiceRequestForm
+from .forms import ServiceRequestForm, SignupForm
+from django.contrib.auth import login
+from django.shortcuts import render, redirect
+
+def signup_view(request):
+    if request.method == 'POST':
+        form = SignupForm(request.POST)
+        if form.is_valid():
+            user = form.save()
+            login(request, user)  # Auto-login after signup
+            return redirect('request_list')  # Redirect to service requests
+    else:
+        form = SignupForm()
+    return render(request, 'registration/signup.html', {'form': form})
+
 
 class ServiceRequestListView(LoginRequiredMixin, ListView):
     model = ServiceRequest
@@ -31,3 +45,15 @@ class ServiceRequestUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateVi
     def test_func(self):
         # to allow only staff users to update the status
         return self.request.user.is_staff
+
+
+def signup_view(request):
+    if request.method == 'POST':
+        form = SignupForm(request.POST)
+        if form.is_valid():
+            user = form.save()
+            login(request, user)
+            return redirect('request_list')
+    else:
+        form = SignupForm()
+    return render(request, 'registration/signup.html', {'form': form})
